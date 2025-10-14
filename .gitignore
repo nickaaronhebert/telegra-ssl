@@ -1,3 +1,4 @@
 .env
 /logs
+/backend/data/app.db
 /.venv
