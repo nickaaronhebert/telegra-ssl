@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Onboarding</title>
+  <link rel="stylesheet" href="./css/animations.css">
+  <script src="./js/i18n.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a;           /* slate-900 */
+      --panel: #0b1220;        /* darker */
+      --card: #0b1220;         /* match panel */
+      --text: #e5e7eb;         /* gray-200 */
+      --muted: #94a3b8;        /* slate-400 */
+      --primary: #06b6d4;      /* cyan-500 */
+      --primary-600: #0891b2;
+      --ring: rgba(6, 182, 212, 0.3);
+      --border: rgba(148, 163, 184, 0.18);
+      --code: #0a0f1d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      background: linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+    /* Hero */
+    .hero {
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(6,182,212,0.25) 0%, rgba(6,182,212,0) 60%),
+                  radial-gradient(1000px 500px at 100% 0%, rgba(99,102,241,0.18) 0%, rgba(99,102,241,0) 60%);
+      border-bottom: 1px solid var(--border);
+      animation: slideInLeft 0.8s ease-out;
+    }
+    .hero-inner { padding: 48px 24px 24px; max-width: 1400px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: .3px; color: var(--text); }
+    .brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 6px rgba(6,182,212,0.15); }
+    
+    /* Hero контент */
+    .hero-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+      margin-top: 20px;
+    }
+    
+    .hero-text {
+      flex: 1;
+    }
+    
+    .hero-text h1 { margin: 0 0 8px; font-size: 32px; line-height: 1.2; }
+    .hero-text p { margin: 0; color: var(--muted); }
+    
+    /* Віджет статистики */
+    .stats-widget {
+      flex-shrink: 0;
+    }
+    
+    .stat-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(6, 182, 212, 0.04));
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 12px;
+      padding: 20px 24px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 20px rgba(6, 182, 212, 0.1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      min-width: 140px;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(6, 182, 212, 0.15);
+      border-color: rgba(6, 182, 212, 0.3);
+    }
+    
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    
+    .stat-sublabel {
+      font-size: 12px;
+      color: var(--muted);
+      opacity: 0.8;
+    }
+    
+    /* Анімація завантаження */
+    .stat-value.loading {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    
+    /* Статуси ALB віджета */
+    .stat-card.status-good {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.04));
+      border-color: rgba(34, 197, 94, 0.3);
+      box-shadow: 0 8px 20px rgba(34, 197, 94, 0.1);
+    }
+    
+    .stat-card.status-good:hover {
+      box-shadow: 0 12px 30px rgba(34, 197, 94, 0.15);
+      border-color: rgba(34, 197, 94, 0.4);
+    }
+    
+    .stat-card.status-good .stat-value {
+      color: #22c55e;
+    }
+    
+    .stat-card.status-warning {
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(251, 191, 36, 0.04));
+      border-color: rgba(251, 191, 36, 0.3);
+      box-shadow: 0 8px 20px rgba(251, 191, 36, 0.1);
+    }
+    
+    .stat-card.status-warning:hover {
+      box-shadow: 0 12px 30px rgba(251, 191, 36, 0.15);
+      border-color: rgba(251, 191, 36, 0.4);
+    }
+    
+    .stat-card.status-warning .stat-value {
+      color: #fbbf24;
+    }
+    
+    .stat-card.status-critical {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(239, 68, 68, 0.04));
+      border-color: rgba(239, 68, 68, 0.3);
+      box-shadow: 0 8px 20px rgba(239, 68, 68, 0.1);
+    }
+    
+    .stat-card.status-critical:hover {
+      box-shadow: 0 12px 30px rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+    
+    .stat-card.status-critical .stat-value {
+      color: #ef4444;
+    }
+    
+    /* Перемикач мов */
+    .language-switcher {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .language-switcher:hover {
+      background: rgba(6, 182, 212, 0.1);
+      border-color: rgba(6, 182, 212, 0.3);
+      transform: translateY(-1px);
+    }
+    
+    .flag {
+      width: 16px;
+      height: 12px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+    
+    .flag-uk {
+      background: linear-gradient(180deg, #005BBB 50%, #FFD500 50%);
+    }
+    
+    .flag-en {
+      background: linear-gradient(
+        180deg,
+        #B22234 0%,
+        #B22234 7.7%,
+        white 7.7%,
+        white 15.4%,
+        #B22234 15.4%,
+        #B22234 23.1%,
+        white 23.1%,
+        white 30.8%,
+        #B22234 30.8%,
+        #B22234 38.5%,
+        white 38.5%,
+        white 46.2%,
+        #B22234 46.2%,
+        #B22234 53.9%,
+        white 53.9%,
+        white 61.6%,
+        #B22234 61.6%,
+        #B22234 69.3%,
+        white 69.3%,
+        white 77%,
+        #B22234 77%,
+        #B22234 84.7%,
+        white 84.7%,
+        white 92.4%,
+        #B22234 92.4%,
+        #B22234 100%
+      );
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .flag-en:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 40%;
+      height: 53.8%;
+      background: #3C3B6E;
+      background-image: 
+        radial-gradient(circle at 10% 15%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 30% 15%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 50% 15%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 70% 15%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 90% 15%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 20% 35%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 40% 35%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 60% 35%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 80% 35%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 10% 55%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 30% 55%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 50% 55%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 70% 55%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 90% 55%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 20% 75%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 40% 75%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 60% 75%, white 0.8px, transparent 0.8px),
+        radial-gradient(circle at 80% 75%, white 0.8px, transparent 0.8px);
+    }
+    
+    .lang-text {
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    /* Layout */
+    .grid { 
+      display: grid; 
+      gap: 20px; 
+      grid-template-columns: 1fr; 
+      grid-auto-rows: minmax(260px, auto); 
+      grid-template-areas:
+        "create"
+        "reissue";
+    }
+    
+    /* Responsive grid для різних розмірів екрану */
+    @media (min-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "create"
+          "reissue";
+      }
+    }
+    
+    @media (min-width: 1200px) {
+      .grid {
+        grid-template-columns: 2fr 1fr;
+        grid-template-areas: "create reissue";
+        gap: 24px;
+      }
+    }
+    
+    .card-create{ grid-area:create; min-height: 360px; }
+    .card-reissue{ grid-area:reissue; min-height: 260px; }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+      backdrop-filter: blur(8px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: slideInUp 0.6s ease-out;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 10px 30px rgba(0,0,0,0.2),
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 0 0 1px rgba(6, 182, 212, 0.08);
+      border-color: rgba(6, 182, 212, 0.15);
+    }
+    
+    .card-create { animation-delay: 0.1s; }
+    .card-reissue { animation-delay: 0.2s; }
+    .card h2 { margin: 0 0 12px; font-size: 18px; position: sticky; top: 0; padding-top: 4px; padding-bottom: 8px; background: linear-gradient(180deg, rgba(11,18,32,.9) 0%, rgba(11,18,32,.6) 100%); backdrop-filter: blur(6px); z-index: 1; }
+
+    form label { 
+      display: block; 
+      margin-top: 10px; 
+      color: var(--muted); 
+      font-size: 14px; 
+    }
+    
+    /* Специальні стилі для label'ів з чекбоксами */
+    form label:has(input[type="checkbox"]),
+    form label.checkbox-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      margin-top: 12px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    
+    form label:has(input[type="checkbox"]):hover,
+    form label.checkbox-label:hover {
+      background: rgba(6, 182, 212, 0.03);
+      color: var(--text);
+    }
+    input:not([type="checkbox"]), select {
+      width: 100%;
+      margin-top: 6px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      color: var(--text);
+      outline: none;
+      font-size: 14px;
+      font-weight: 400;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Кастомні чекбокси */
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin: 0 8px 0 0;
+      appearance: none;
+      -webkit-appearance: none;
+      background: rgba(255,255,255,0.03);
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
+      vertical-align: middle;
+    }
+    
+    input[type="checkbox"]:hover {
+      border-color: rgba(6, 182, 212, 0.5);
+      background: rgba(6,182,212,0.05);
+      transform: scale(1.05);
+    }
+    
+    input[type="checkbox"]:checked {
+      background: linear-gradient(135deg, var(--primary), var(--primary-600));
+      border-color: var(--primary);
+    }
+    
+    input[type="checkbox"]:checked::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    input[type="checkbox"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--ring);
+      outline: none;
+    }
+    
+    input:focus, select:focus { 
+      border-color: var(--primary);
+      background: rgba(6,182,212,0.05);
+      transform: translateY(-1px);
+      box-shadow: 
+        0 0 0 4px var(--ring),
+        0 4px 15px rgba(6, 182, 212, 0.15);
+    }
+    
+    input:hover:not(:focus), select:hover:not(:focus) {
+      border-color: rgba(6, 182, 212, 0.3);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .card { height: 100%; display: flex; flex-direction: column; }
+
+    button {
+      margin-top: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: rgba(255,255,255,0.03);
+      cursor: pointer;
+      font-weight: 500;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
+    }
+    
+    button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+    
+    button:hover:not(:disabled)::before {
+      width: 300px;
+      height: 300px;
+    }
+    
+    button:disabled { 
+      opacity: .5; 
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    button:hover:not(:disabled) {
+      border-color: var(--primary);
+      background: rgba(6,182,212,0.08);
+      transform: translateY(-1px) scale(1.01);
+      box-shadow: 
+        0 4px 15px rgba(0, 0, 0, 0.1),
+        0 2px 8px rgba(6, 182, 212, 0.15);
+    }
+    
+    button:active:not(:disabled) {
+      transform: translateY(0px) scale(0.98);
+      transition: all 0.1s ease;
+    }
+    
+    .btn-primary { 
+      background: linear-gradient(135deg, var(--primary), var(--primary-600));
+      border-color: transparent;
+      color: white;
+      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.25);
+    }
+    
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+      );
+      transition: left 0.5s ease;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      filter: brightness(1.05);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 
+        0 8px 25px rgba(6, 182, 212, 0.25),
+        0 4px 12px rgba(6, 182, 212, 0.2);
+    }
+    
+    .btn-primary:hover:not(:disabled)::after {
+      left: 100%;
+    }
+
+    pre {
+      background: var(--code);
+      border: 1px solid var(--border);
+      padding: 10px;
+      border-radius: 10px;
+      overflow-x:auto;
+      color: #cbd5e1;
+    }
+    .muted { color: var(--muted); font-size: 13px; }
+    
+    /* Адаптивний дизайн для широкоформатних моніторів */
+    .grid {
+      transition: all 0.3s ease;
+    }
+    
+    .container {
+      transition: padding 0.3s ease;
+    }
+    
+    /* Середні екрани */
+    @media (min-width: 1024px) {
+      .container { padding: 32px 40px; }
+      .hero-inner { padding: 56px 40px 32px; }
+      .card { padding: 20px; }
+    }
+    
+    /* Великі екрани */
+    @media (min-width: 1400px) {
+      .container { padding: 40px 60px; }
+      .hero-inner { padding: 60px 60px 40px; }
+      .card { padding: 24px; }
+      .grid { gap: 28px; }
+    }
+    
+    /* Mobile */
+    @media (max-width: 768px) {
+      .container { padding: 16px; }
+      .hero-inner { padding: 32px 16px 20px; }
+      
+      .hero-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 20px;
+      }
+      
+      .hero-text h1 { font-size: 24px; }
+      
+      .stat-card {
+        padding: 16px 20px;
+        min-width: auto;
+      }
+      
+      .stat-value {
+        font-size: 28px;
+      }
+      
+      .card { 
+        padding: 14px;
+        margin-bottom: 8px;
+      }
+      
+      button {
+        padding: 10px 14px;
+        font-size: 14px;
+      }
+      
+      input, select {
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+      
+      /* Touch improvements */
+      button:hover {
+        transform: none;
+        box-shadow: 
+          0 2px 8px rgba(0, 0, 0, 0.08),
+          0 1px 4px rgba(6, 182, 212, 0.1);
+      }
+      
+      button:active {
+        transform: scale(0.95);
+      }
+      
+      .card:hover {
+        transform: translateY(-1px);
+        box-shadow: 
+          0 5px 20px rgba(0,0,0,0.1),
+          inset 0 1px 0 rgba(255,255,255,0.03);
+      }
+      
+      .btn-primary:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 
+          0 4px 15px rgba(6, 182, 212, 0.15),
+          0 2px 8px rgba(6, 182, 212, 0.1);
+      }
+    }
+    
+    /* Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+    
+    /* ANIMATED INPUT FIELDS - Beautiful version */
+    input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]) {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      width: 100% !important;
+      height: 44px !important;
+      padding: 12px 14px !important;
+      margin: 6px 0 16px 0 !important;
+      background: rgba(255,255,255,0.03) !important;
+      border: 1px solid rgba(148, 163, 184, 0.18) !important;
+      border-radius: 10px !important;
+      color: #e5e7eb !important;
+      font-size: 14px !important;
+      font-weight: 400 !important;
+      box-sizing: border-box !important;
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif !important;
+      backdrop-filter: blur(10px) !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      outline: none !important;
+    }
+    
+    /* Hover animations */
+    input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):hover:not(:focus) {
+      border-color: rgba(6, 182, 212, 0.3) !important;
+      background: rgba(255,255,255,0.05) !important;
+      transform: translateY(-1px) !important;
+    }
+    
+    /* Focus animations with glow */
+    input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):focus {
+      border-color: var(--primary) !important;
+      background: rgba(6,182,212,0.05) !important;
+      outline: none !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 
+        0 0 0 4px rgba(6, 182, 212, 0.3) !important,
+        0 4px 15px rgba(6, 182, 212, 0.15) !important,
+        0 0 20px rgba(6, 182, 212, 0.1) !important;
+      animation: inputGlow 2s infinite alternate !important;
+    }
+    
+    /* Glow animation keyframes */
+    @keyframes inputGlow {
+      0% { box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.3), 0 4px 15px rgba(6, 182, 212, 0.15), 0 0 20px rgba(6, 182, 212, 0.1); }
+      100% { box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.4), 0 6px 20px rgba(6, 182, 212, 0.2), 0 0 30px rgba(6, 182, 212, 0.15); }
+    }
+    
+    /* Placeholder animation */
+    input::placeholder {
+      color: rgba(148, 163, 184, 0.6) !important;
+      transition: all 0.3s ease !important;
+    }
+    
+    input:hover::placeholder {
+      color: rgba(148, 163, 184, 0.8) !important;
+    }
+    
+    input:focus::placeholder {
+      color: rgba(6, 182, 212, 0.7) !important;
+      transform: translateX(2px) !important;
+    }
+    
+    /* Shimmer effect for empty inputs */
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    
+    input:not([value]):not(:focus):empty {
+      background: linear-gradient(
+        90deg,
+        rgba(255,255,255,0.03) 0%,
+        rgba(255,255,255,0.06) 50%,
+        rgba(255,255,255,0.03) 100%
+      ) !important;
+      background-size: 200% 100% !important;
+      animation: shimmer 3s infinite !important;
+    }
+    
+    /* Form and animated label styles */
+    form {
+      display: block !important;
+      visibility: visible !important;
+    }
+    
+    form label {
+      display: block !important;
+      visibility: visible !important;
+      margin: 16px 0 6px 0 !important;
+      color: var(--muted) !important;
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      transition: all 0.2s ease !important;
+      opacity: 0.9 !important;
+    }
+    
+    /* Label hover effect */
+    form label:hover {
+      color: var(--text) !important;
+      opacity: 1 !important;
+      transform: translateX(2px) !important;
+    }
+    
+    /* Enhanced label when next input is focused */
+    input:focus + label,
+    input:focus ~ label {
+      color: var(--primary) !important;
+      opacity: 1 !important;
+      transform: translateY(-1px) !important;
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+    <div class="brand">
+      <img src="logo.jpg" alt="Telegra Logo" style="height:28px;opacity:.95" /> 
+      <span data-i18n="header.title">Client Onboarding</span> 
+      <div style="margin-left:auto;display:flex;align-items:center;gap:16px;">
+        <div class="language-switcher" onclick="toggleLanguage()">
+          <span class="flag flag-uk" id="flag-icon"></span>
+          <span class="lang-text" id="current-lang" data-i18n="lang.current">Українська</span>
+        </div>
+        <a href="clients.html" style="color:#94a3b8;text-decoration:none;font-size:14px" data-i18n="header.clients-link">Клієнти →</a>
+      </div>
+    </div>
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1 data-i18n="header.subtitle">Швидке підключення клієнтів</h1>
+          <p data-i18n="header.description">ACM сертифікати, PR до фронтенду, Ingress у кластер — все в одному інтерфейсі.</p>
+        </div>
+        <div class="stats-widget">
+          <div class="stat-card">
+            <div class="stat-value" id="certCount">-</div>
+            <div class="stat-label" data-i18n="stats.certificates">Сертифікати</div>
+            <div class="stat-sublabel" id="albGroup" data-i18n="stats.loading">Завантаження...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+  <div class="grid">
+  <div class="card card-create">
+    <h2 data-i18n="create.title">Створити клієнта</h2>
+    <form id="createForm">
+      <label data-i18n="create.domain">Domain</label>
+      <input name="domain" data-i18n="create.domain.placeholder" placeholder="example.com" required />
+      
+      <label data-i18n="create.subdomain">Subdomain</label>
+      <input name="subdomain" data-i18n="create.subdomain.placeholder" placeholder="patient" value="patient" />
+      
+      <label data-i18n="create.affiliate">Affiliate</label>
+      <input name="affiliate" data-i18n="create.affiliate.placeholder" placeholder="UUID" required />
+      
+      <label data-i18n="create.alb-group">ALB group.name (опційно)</label>
+      <input name="group_name" data-i18n="create.alb-group.placeholder" placeholder="telemd-public3" />
+      <label class="checkbox-label">
+        <input type="checkbox" name="create_pr" /> <span data-i18n="create.create-pr">Створити PR у фронтенд-репо</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" name="auto_merge" /> <span data-i18n="create.auto-merge">Авто-мердж PR</span>
+      </label>
+      <button type="submit" class="btn-primary" data-i18n="create.submit">Створити</button>
+    </form>
+    <div id="createResult"></div>
+  </div>
+
+
+  <div class="card card-reissue">
+    <h2 data-i18n="reissue.title">Повторити запит сертифіката</h2>
+    <form id="reissueForm">
+      <label data-i18n="reissue.domain">Domain</label>
+      <input name="domain" data-i18n="reissue.domain.placeholder" placeholder="example.com" required />
+      <div style="padding: 12px; background: rgba(6, 182, 212, 0.05); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 8px; margin-top: 12px; font-size: 13px; color: #94a3b8;">
+        <strong style="color: #06b6d4;">ℹ️ <span data-i18n="reissue.auto-actions-title">Автоматичні дії</span>:</strong><br>
+        • <span data-i18n="reissue.action-update-database">Оновлення ARN в базі даних</span><br>
+        • <span data-i18n="reissue.action-update-ingress">Оновлення файлів інгресу</span><br>
+        • <span data-i18n="reissue.action-delete-cert">Видалення старого сертифіката</span>
+      </div>
+      <button type="submit" class="btn-primary" data-i18n="reissue.submit">Reissue Full</button>
+    </form>
+    <div id="reissueResult"></div>
+  </div>
+
+  </div> <!-- end .grid -->
+  </div> <!-- end .container -->
+
+  <script>
+const backend = 'https://manage.telegramd.com';
+
+  // Завантаження статистики ALB сертифікатів
+  const loadAlbStats = async () => {
+    const certCountEl = document.getElementById('certCount');
+    const albGroupEl = document.getElementById('albGroup');
+    const statCard = document.querySelector('.stat-card');
+    
+    // Почати анімацію завантаження
+    certCountEl.classList.add('loading');
+    certCountEl.textContent = '•••';
+    albGroupEl.textContent = 'Завантаження...';
+    
+    try {
+      // Отримуємо статистику поточного ALB
+      const response = await fetch(`${backend}/alb/current-stats`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch ALB stats');
+      }
+      
+      const data = await response.json();
+      
+      // Оновлення UI
+      certCountEl.textContent = data.certificate_count;
+      const freeText = data.remaining >= 0 ? 
+        `${data.remaining} ${window.i18n?.t('stats.free') || 'вільно'}` : 
+        `${window.i18n?.t('stats.exceeded') || 'перевищено на'} ${Math.abs(data.remaining)}`;
+      albGroupEl.textContent = `${window.i18n?.t('stats.alb') || 'ALB'}: ${data.group_name} (${freeText})`;
+      
+      // Прибрати анімацію
+      certCountEl.classList.remove('loading');
+      
+      // Оновлити стилі залежно від статусу
+      statCard.classList.remove('status-good', 'status-warning', 'status-critical');
+      statCard.classList.add(`status-${data.status}`);
+      
+    } catch (error) {
+      console.error('Error loading ALB stats:', error);
+      certCountEl.textContent = '?';
+      albGroupEl.textContent = window.i18n?.t('stats.load-error') || 'Помилка завантаження';
+      certCountEl.classList.remove('loading');
+      
+      // Прибрати всі статуси при помилці
+      const statCard = document.querySelector('.stat-card');
+      statCard.classList.remove('status-good', 'status-warning', 'status-critical');
+    }
+  };
+  
+  // Завантажити статистику при завантаженні сторінки
+  loadAlbStats();
+  
+  // Оновлювати статистику кожні 30 секунд
+  setInterval(loadAlbStats, 30000);
+  
+  // Оновлення флага в перемикачі мов
+  function updateLanguageFlag() {
+    const flagIcon = document.getElementById('flag-icon');
+    const currentLang = document.getElementById('current-lang');
+    
+    if (flagIcon && window.i18n) {
+      const lang = window.i18n.getCurrentLanguage();
+      flagIcon.className = `flag flag-${lang}`;
+    }
+  }
+  
+  // Обробка перемикання мови для цієї сторінки
+  function handleLanguageToggle() {
+    updateLanguageFlag();
+    // Перезавантажити статистику з новою мовою
+    setTimeout(loadAlbStats, 100);
+  }
+  
+  // Подія на зміну мови
+  document.addEventListener('languageChanged', handleLanguageToggle);
+  
+  // Оновлювати флаг після ініціалізації системи локалізації
+  setTimeout(updateLanguageFlag, 100);
+
+    const getJson = async (url) => {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    };
+
+    const postJson = async (url, body) => {
+      const currentLang = window.i18n ? window.i18n.getCurrentLanguage() : 'uk';
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept-Language': currentLang
+        },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    };
+
+    document.getElementById('createForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+      
+      const fd = new FormData(e.target);
+      const payload = Object.fromEntries(fd.entries());
+      payload.create_pr = !!fd.get('create_pr');
+      payload.auto_merge = !!fd.get('auto_merge');
+      try {
+        const data = await postJson(backend + '/clients', payload);
+        const domain = data.domain || payload.domain || '';
+        const subdomain = data.subdomain || payload.subdomain || '';
+        const host = subdomain && domain ? `${subdomain}.${domain}` : '';
+        const albValue = data.alb_dns_name || '';
+        document.getElementById('createResult').innerHTML = `
+          <div style="border:1px solid rgba(148,163,184,0.25);border-radius:10px;padding:14px;background:rgba(255,255,255,0.02);line-height:1.5">
+            <div style="margin-bottom:8px;color:#e5e7eb">Please add the following CNAME records to the ${domain} DNS configuration</div>
+            <div style="margin:8px 0;color:#cbd5e1">SSL/TLS certificate validation:</div>
+            <div>DNS Name: <code>${data.dns_name}</code></div>
+            <div>DNS Value: <code style="word-break:break-all">${data.dns_value}</code></div>
+            <div style="margin:12px 0 6px;color:#cbd5e1">Cabinet DNS record:</div>
+            <div>Name: <code>${host}</code></div>
+            <div>Value: <code>${albValue || '<< set ALB_PUBLIC_HOSTNAME in backend env >>'}</code></div>
+          </div>
+        `;
+        loadAlbStats(); // Оновити статистику
+      } catch (err) {
+        document.getElementById('createResult').innerHTML = `<pre>${err.message}</pre>`;
+      } finally {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+      }
+    });
+
+
+
+    document.getElementById('reissueForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+      
+      const fd = new FormData(e.target);
+      const payload = {
+        domain: fd.get('domain'),
+        update_database: true,  // Завжди увімкнено
+        update_ingress: true,   // Завжди увімкнено
+        delete_old_cert: true   // Завжди увімкнено
+      };
+      
+      try {
+        const data = await postJson(backend + '/cert/reissue-full', payload);
+        
+        let resultHtml = `
+          <div style="border: 1px solid #22c55e; border-radius: 8px; padding: 16px; background: rgba(34, 197, 94, 0.05); margin-top: 16px;">
+            <h3 style="color: #22c55e; margin: 0 0 12px 0;">✅ Успішно оновлено!</h3>
+            <p><strong>Old Certificate ARN:</strong> <code style="word-break: break-all;">${data.old_certificate_arn || 'Немає'}</code></p>
+            <p><strong>New Certificate ARN:</strong> <code style="word-break: break-all;">${data.new_certificate_arn}</code></p>
+            <p><strong>Status:</strong> <span style="color: ${data.status === 'ISSUED' ? '#22c55e' : data.status === 'PENDING_VALIDATION' ? '#fbbf24' : '#ef4444'}">${data.status}</span></p>
+            <p><strong>Оновлено клієнтів:</strong> ${data.clients_updated}</p>
+            <p><strong>Оновлено файлів:</strong> ${data.files_updated}</p>
+          </div>
+          
+          <div style="border: 1px solid #fbbf24; border-radius: 8px; padding: 16px; background: rgba(251, 191, 36, 0.05); margin-top: 16px;">
+            <h4 style="color: #fbbf24; margin: 0 0 8px 0;">🔑 DNS Валідація</h4>
+            <p><strong>DNS Name:</strong> <code>${data.dns_name}</code></p>
+            <p><strong>DNS Value:</strong> <code style="word-break: break-all;">${data.dns_value}</code></p>
+          </div>
+          
+          <div style="border: 1px solid #06b6d4; border-radius: 8px; padding: 16px; background: rgba(6, 182, 212, 0.05); margin-top: 16px;">
+            <h4 style="color: #06b6d4; margin: 0 0 8px 0;">📝 Наступні кроки:</h4>
+            <ol style="margin: 0; padding-left: 20px;">
+              ${data.next_steps.map(step => `<li>${step}</li>`).join('')}
+            </ol>
+          </div>
+        `;
+        
+        if (data.warning) {
+          resultHtml += `
+            <div style="border: 1px solid #ef4444; border-radius: 8px; padding: 16px; background: rgba(239, 68, 68, 0.05); margin-top: 16px;">
+              <h4 style="color: #ef4444; margin: 0 0 8px 0;">⚠️ Попередження</h4>
+              <p style="margin: 0;">${data.warning}</p>
+            </div>
+          `;
+        }
+        
+        document.getElementById('reissueResult').innerHTML = resultHtml;
+        
+      } catch (err) {
+        document.getElementById('reissueResult').innerHTML = `
+          <div style="border: 1px solid #ef4444; border-radius: 8px; padding: 16px; background: rgba(239, 68, 68, 0.05); margin-top: 16px;">
+            <h3 style="color: #ef4444; margin: 0 0 12px 0;">❌ Помилка</h3>
+            <pre style="white-space: pre-wrap; word-break: break-word;">${err.message}</pre>
+          </div>
+        `;
+      } finally {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+      }
+    });
+    
+    // Обробник зміни мови для оновлення перекладів
+    document.addEventListener('languageChanged', function() {
+      // Очистити кеш перекладів i18n
+      if (window.i18n && window.i18n.updatePageTexts) {
+        window.i18n.updatePageTexts();
+      }
+    });
+
+  </script>
+  </div>
+</body>
+</html>

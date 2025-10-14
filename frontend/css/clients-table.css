@@ -1,0 +1,271 @@
+/* Мінімальний CSS - основні стилі в HTML */
+.list {
+  display: block;
+  margin-top: 12px;
+}
+
+.muted { color: var(--muted); }
+
+/* Mobile */
+@media (max-width: 900px) {
+  .list {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  background: rgba(11, 18, 32, 0.95);
+  backdrop-filter: blur(10px);
+  text-align: left;
+  color: #cbd5e1;
+  font-weight: 600;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(6, 182, 212, 0.2);
+  padding: 12px 10px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+thead th:hover {
+  color: #06b6d4;
+  border-bottom-color: rgba(6, 182, 212, 0.4);
+}
+
+tbody td {
+  padding: 12px 10px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  font-size: 14px;
+  color: #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+tbody tr {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+tbody tr::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: linear-gradient(90deg, rgba(6, 182, 212, 0.1), transparent);
+  transition: width 0.3s ease;
+}
+
+tbody tr:hover {
+  background: rgba(6, 182, 212, 0.02);
+  transform: translateX(2px);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+tbody tr:hover::before {
+  width: 4px;
+}
+
+.cell-name {
+  position: relative;
+}
+
+.cell-name a {
+  color: #e5e7eb;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+  padding: 4px 0;
+}
+
+.cell-name a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #06b6d4, #0891b2);
+  transition: width 0.3s ease;
+}
+
+.cell-name a:hover {
+  color: #06b6d4;
+  transform: translateY(-1px);
+}
+
+.cell-name a:hover::after {
+  width: 100%;
+}
+
+.status-badge {
+  font-size: 11px;
+  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.08);
+  padding: 3px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  transition: all 0.2s ease;
+  display: inline-block;
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 1px 0;
+}
+
+.status-badge:hover {
+  background: rgba(148, 163, 184, 0.15);
+  border-color: rgba(148, 163, 184, 0.25);
+  transform: translateY(-1px);
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  transition: all 0.3s ease;
+  margin-right: 6px;
+}
+
+.dot.green {
+  background: #10b981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  animation: pulse-green 3s infinite;
+}
+
+.dot.red {
+  background: #ef4444;
+  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  animation: pulse-red 3s infinite;
+}
+
+.dot.gray {
+  background: #64748b;
+}
+
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  70% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* Button animations in table */
+.btn-deploy {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(6, 182, 212, 0.08));
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  color: #06b6d4;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  min-width: 85px;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-deploy::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-deploy:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(6, 182, 212, 0.1));
+  border-color: rgba(6, 182, 212, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);
+}
+
+.btn-deploy:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.btn-deploy:active:not(:disabled) {
+  transform: translateY(0px) scale(0.95);
+  transition: all 0.1s ease;
+}
+
+.btn-deploy:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: rgba(148, 163, 184, 0.05);
+  border-color: rgba(148, 163, 184, 0.1);
+  color: #64748b;
+}
+
+/* Loading states */
+.loading-row {
+  animation: shimmer 1.5s infinite;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Responsive таблиця */
+@media (max-width: 768px) {
+  .list {
+    border-radius: 8px;
+  }
+  
+  table {
+    min-width: 600px;
+    font-size: 13px;
+  }
+  
+  thead th {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+  
+  tbody td {
+    padding: 8px 6px;
+    font-size: 13px;
+  }
+  
+  .status-badge {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+  
+  .btn-deploy {
+    padding: 3px 6px;
+    font-size: 10px;
+    min-width: 70px;
+  }
+  
+  .dot {
+    width: 10px;
+    height: 10px;
+  }
+}

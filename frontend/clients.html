@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clients — Client Onboarding</title>
+  <link rel="icon" href="/favicon.ico" />
+  <script src="./js/i18n.js"></script>
+  <style>
+    :root{--bg:#0f172a;--panel:#0b1220;--text:#e5e7eb;--muted:#94a3b8;--green:#10b981;--red:#ef4444;--gray:#64748b;--border:rgba(148,163,184,.18)}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(180deg,#0b1220,#0f172a);color:var(--text)}
+    .container{max-width:1400px;margin:0 auto;padding:20px}
+    h1{margin:0 0 16px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));border:1px solid var(--border);border-radius:14px;padding:16px}
+    .row{display:flex;gap:10px;align-items:center}
+    .grid{display:grid;gap:10px}
+    code{color:#cbd5e1}
+    .muted{color:var(--muted)}
+    
+    /* Кнопки */
+    button {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    
+    button:hover:not(:disabled) {
+      border-color: var(--green);
+      background: rgba(16, 185, 129, 0.08);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    /* Input поля */
+    input {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      width: 100%;
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+    
+    input:focus {
+      border-color: var(--green);
+      background: rgba(16, 185, 129, 0.05);
+      transform: translateY(-1px);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+      outline: none;
+    }
+    
+    .cols{display:block}
+    
+    /* Toast */
+    #toast{position:fixed;right:16px;bottom:16px;background:rgba(17,24,39,.9);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:10px;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .2s ease, transform .2s ease;z-index:1000}
+    #toast.show{opacity:1;transform:translateY(0)}
+    
+    /* Робочі стилі таблиці */
+    .list {
+      display: block;
+      margin-top: 12px;
+    }
+    
+    .list table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .list th, .list td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    
+    .list th {
+      background: rgba(11, 18, 32, 0.8);
+      font-weight: 600;
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+    
+    /* Ширини колонок */
+    .list th:nth-child(1), .list td:nth-child(1) { width: 26%; } /* Ім'я */
+    .list th:nth-child(2), .list td:nth-child(2) { width: 28%; } /* Сертифікат */
+    .list th:nth-child(3), .list td:nth-child(3) { width: 7%; text-align: center; } /* ALB */
+    .list th:nth-child(4), .list td:nth-child(4) { width: 7%; text-align: center; } /* Cert DNS */
+    .list th:nth-child(5), .list td:nth-child(5) { width: 8%; text-align: center; } /* Client DNS */
+    .list th:nth-child(6), .list td:nth-child(6) { width: 8%; text-align: center; } /* Web */
+    .list th:nth-child(7), .list td:nth-child(7) { width: 16%; text-align: center; } /* Дії */
+    
+    .list .status-badge {
+      background: rgba(148, 163, 184, 0.1);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    
+    .list .btn-deploy {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: #06b6d4;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      margin: 0;
+    }
+    
+    .list .btn-deploy:hover:not(:disabled) {
+      background: rgba(6, 182, 212, 0.2);
+      border-color: rgba(6, 182, 212, 0.5);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(6, 182, 212, 0.3);
+    }
+    
+    .list .btn-applied {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #10b981;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: default;
+      margin: 0;
+    }
+    
+    .refresh-web-btn:hover {
+      color: #06b6d4 !important;
+      transform: rotate(90deg);
+      transition: all 0.3s ease;
+    }
+    
+    .list .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+    }
+    
+    .list .dot.green { background: #10b981; }
+    .list .dot.gray { background: #64748b; }
+    .list .dot.red { background: #ef4444; }
+    .list .dot.yellow { background: #fbbf24; }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    
+    .list .cell-name a { color: #e5e7eb; text-decoration: none; }
+    .list .cell-name a:hover { color: #06b6d4; }
+    
+    
+    /* Адаптивний дизайн */
+    @media (min-width: 1400px) {
+      .container { padding: 40px 60px; }
+      .card { padding: 24px; }
+    }
+    
+    @media (max-width: 768px) {
+      .container { padding: 16px; }
+      .card { padding: 12px; }
+      .list { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      table { min-width: 600px; }
+    }
+    
+    /* Перемикач мов */
+    .language-switcher {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .language-switcher:hover {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.3);
+      transform: translateY(-1px);
+    }
+    
+    .flag {
+      width: 16px;
+      height: 12px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+    
+    .flag-uk {
+      background: linear-gradient(180deg, #005BBB 50%, #FFD500 50%);
+    }
+    
+    .flag-en {
+      background: linear-gradient(
+        180deg,
+        #B22234 0%,
+        #B22234 7.7%,
+        white 7.7%,
+        white 15.4%,
+        #B22234 15.4%,
+        #B22234 23.1%,
+        white 23.1%,
+        white 30.8%,
+        #B22234 30.8%,
+        #B22234 38.5%,
+        white 38.5%,
+        white 46.2%,
+        #B22234 46.2%,
+        #B22234 53.9%,
+        white 53.9%,
+        white 61.6%,
+        #B22234 61.6%,
+        #B22234 69.3%,
+        white 69.3%,
+        white 77%,
+        #B22234 77%,
+        #B22234 84.7%,
+        white 84.7%,
+        white 92.4%,
+        #B22234 92.4%,
+        #B22234 100%
+      );
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .flag-en:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 40%;
+      height: 53.8%;
+      background: #3C3B6E;
+      background-image: 
+        radial-gradient(circle at 15% 20%, white 0.6px, transparent 0.6px),
+        radial-gradient(circle at 35% 20%, white 0.6px, transparent 0.6px),
+        radial-gradient(circle at 55% 20%, white 0.6px, transparent 0.6px),
+        radial-gradient(circle at 75% 20%, white 0.6px, transparent 0.6px),
+        radial-gradient(circle at 25% 40%, white 0.6px, transparent 0.6px),
+        radial-gradient(circle at 45% 40%, white 0.6px, transparent 0.6px),
+        radial-gradient(circle at 65% 40%, white 0.6px, transparent 0.6px),
+        radial-gradient(circle at 15% 60%, white 0.6px, transparent 0.6px),
+        radial-gradient(circle at 35% 60%, white 0.6px, transparent 0.6px),
+        radial-gradient(circle at 55% 60%, white 0.6px, transparent 0.6px),
+        radial-gradient(circle at 75% 60%, white 0.6px, transparent 0.6px),
+        radial-gradient(circle at 25% 80%, white 0.6px, transparent 0.6px),
+        radial-gradient(circle at 45% 80%, white 0.6px, transparent 0.6px),
+        radial-gradient(circle at 65% 80%, white 0.6px, transparent 0.6px);
+    }
+    
+    .lang-text {
+      color: var(--text);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="row" style="justify-content:space-between">
+      <h1 data-i18n="clients.title">Клієнти</h1>
+      <div class="row" style="gap: 16px;">
+        <div class="language-switcher" onclick="toggleLanguage()">
+          <span class="flag flag-uk" id="flag-icon"></span>
+          <span class="lang-text" id="current-lang" data-i18n="lang.current">Українська</span>
+        </div>
+        <a href="index.html" style="color:var(--muted);text-decoration:none" data-i18n="clients.back-link">← Головна</a>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div class="card">
+        <div class="row" style="gap:8px;flex-wrap:wrap">
+          <button id="refresh" data-i18n="clients.button.refresh">Оновити</button>
+          <button id="refreshK8s" data-i18n="clients.button.refresh-k8s">Оновити стан K8s</button>
+          <button id="importNow" data-i18n="clients.button.import">Імпортувати</button>
+          <button id="checkAllDns" data-i18n="clients.button.check-all-dns">Перевірити всі DNS</button>
+          <button id="albStats" data-i18n="clients.button.alb-stats">ALB групи</button>
+          <input id="filter" data-i18n="clients.filter.placeholder" placeholder="Фільтр за доменом (наприклад, example.com)" />
+        </div>
+        <div id="list" class="list">
+          <table>
+            <colgroup>
+              <col style="width:26%">
+              <col style="width:28%">
+              <col style="width:7%">
+              <col style="width:7%">
+              <col style="width:8%">
+              <col style="width:8%">
+              <col style="width:16%">
+            </colgroup>
+            <thead>
+              <tr>
+                <th data-i18n="clients.table.name">Ім'я</th>
+                <th data-i18n="clients.table.certificate">Статус сертифіката</th>
+                <th data-i18n="clients.table.alb-status" title="Статус ALB групи">ALB</th>
+                <th data-i18n="clients.table.cert-dns-status" title="DNS записи для сертифіката">Cert DNS</th>
+                <th data-i18n="clients.table.client-dns-status" title="DNS перевірка клієнта на ALB">Client DNS</th>
+                <th data-i18n="clients.table.web-status">Web</th>
+                <th data-i18n="clients.table.actions">Дії</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+            <tfoot>
+              <tr><td colspan="7"><span id="count" class="status-badge"></span></td></tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const backend = 'https://manage.telegramd.com';
+    
+    // Кешування та дебаунсинг для оптимізації
+    let renderTimeout = null;
+    let lastRenderData = null;
+    let lastRenderTime = 0;
+    const RENDER_DEBOUNCE = 100; // мс
+    const MIN_RENDER_INTERVAL = 500; // мс
+    
+    // Debounce функція
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+    
+    // Порівняння даних для запобігання зайвих re-render
+    function dataChanged(newData, oldData) {
+      if (!oldData || newData.length !== oldData.length) return true;
+      return JSON.stringify(newData) !== JSON.stringify(oldData);
+    }
+
+    // Toast utility
+    const showToast = (msg) => {
+      let t = document.getElementById('toast');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'toast';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=> t.classList.remove('show'), 2500);
+    };
+
+    // Перевірка HTTP статусу для одного клієнта
+    window.refreshWebStatus = async (clientId) => {
+      try {
+        // Знаходимо рядок в таблиці
+        const row = document.querySelector(`tr[data-client-id="${clientId}"]`);
+        if (!row) return;
+        
+        const webCell = row.querySelector('.web-status-cell');
+        if (!webCell) return;
+        
+        // Показуємо індикатор завантаження
+        webCell.innerHTML = '<span class="dot gray" title="Checking..." style="animation: pulse 1.5s ease-in-out infinite;"></span>';
+        
+        // Виконуємо запит до нового endpoint
+        const res = await fetch(`${backend}/clients/${clientId}/check-http`, { method: 'POST' });
+        if (!res.ok) {
+          throw new Error(await res.text());
+        }
+        
+        const data = await res.json();
+        
+        // Оновлюємо лампочку з результатом
+        const applied = row.querySelector('.btn-applied') ? true : false;
+        webCell.innerHTML = dot(data.status, applied, false, clientId, data.host);
+        
+        // Показуємо toast з результатом
+        const statusText = data.status === 'up' ? '✅ Online' : data.status === 'down' ? '❌ Offline' : '⚠️ Unknown';
+        showToast(`${data.host}: ${statusText}`);
+      } catch (e) {
+        console.error('Failed to refresh web status:', e);
+        showToast('❌ Помилка перевірки веб-статусу');
+      }
+    };
+
+    // Перевірка DNS статусу для одного клієнта
+    window.refreshDnsStatus = async (clientId) => {
+      try {
+        // Знаходимо рядок в таблиці
+        const row = document.querySelector(`tr[data-client-id="${clientId}"]`);
+        if (!row) return;
+        
+        const dnsCell = row.querySelector('.client-dns-status-cell');
+        if (!dnsCell) return;
+        
+        // Показуємо індикатор завантаження
+        dnsCell.innerHTML = '<span class="dot gray" title="Checking DNS..." style="animation: pulse 1.5s ease-in-out infinite;"></span>';
+        
+        // Виконуємо запит до нового endpoint
+        const res = await fetch(`${backend}/clients/${clientId}/check-dns`, { method: 'POST' });
+        if (!res.ok) {
+          throw new Error(await res.text());
+        }
+        
+        const data = await res.json();
+        
+        // Оновлюємо лампочку з результатом
+        const applied = row.querySelector('.btn-applied') ? true : false;
+        dnsCell.innerHTML = clientDnsStatusDot(
+          data.dns_check_status,
+          applied,
+          false,
+          clientId,
+          data.host,
+          data.dns_check_details
+        );
+        
+        // Показуємо toast з результатом
+        const statusText = 
+          data.dns_check_status === 'correct' ? '✅ DNS correct' : 
+          data.dns_check_status === 'incorrect' ? '⚠️ DNS incorrect' : 
+          data.dns_check_status === 'missing' ? '❌ DNS missing' : 
+          '⚠️ DNS unknown';
+        showToast(`${data.host}: ${statusText}`);
+      } catch (e) {
+        console.error('Failed to refresh DNS status:', e);
+        showToast('❌ Помилка перевірки DNS');
+      }
+    };
+
+    const dot = (status, applied, loading = false, clientId = null, host = null) => {
+      // Кнопка перевірки доступна для всіх клієнтів з host
+      const refreshIcon = (clientId && host) ? `<button onclick="refreshWebStatus(${clientId})" class="refresh-web-btn" title="Check web availability" style="background:none;border:none;cursor:pointer;padding:2px;margin-left:4px;color:#94a3b8;font-size:12px;">🔄</button>` : '';
+      
+      if (loading) return `<span class="dot gray" title="Checking..." style="animation: pulse 1.5s ease-in-out infinite;"></span>${refreshIcon}`;
+      if (status === 'up') return `<span class="dot green" title="✅ Online"></span>${refreshIcon}`;
+      if (status === 'down') return `<span class="dot red" title="❌ Offline"></span>${refreshIcon}`;
+      if (!applied) return `<span class="dot gray" title="Not deployed"></span>${refreshIcon}`;
+      // Для deployed клієнтів без статусу
+      return `<span class="dot gray" title="Click 🔄 to check"></span>${refreshIcon}`;
+    };
+    
+    const albStatusDot = (status, groupName) => {
+      const title = `ALB ${groupName || '?'}: ${status}`;
+      switch(status) {
+        case 'ready': return `<span class="dot green" title="${title} - ALB налаштований і готовий"></span>`;
+        case 'missing': return `<span class="dot red" title="${title} - ALB не знайдено"></span>`;
+        case 'error': return `<span class="dot yellow" title="${title} - помилка перевірки ALB"></span>`;
+        default: return `<span class="dot gray" title="${title} - невідомий статус"></span>`;
+      }
+    };
+    
+    const dnsStatusDot = (status, certStatus) => {
+      const title = `DNS записи (${certStatus || 'UNKNOWN'}): ${status}`;
+      switch(status) {
+        case 'validated': return `<span class="dot green" title="${title} - сертифікат валідований"></span>`;
+        case 'ready': return `<span class="dot yellow" title="${title} - DNS записи готові для додавання"></span>`;
+        case 'pending': return `<span class="dot gray" title="${title} - очікування DNS записів від AWS"></span>`;
+        case 'failed': return `<span class="dot red" title="${title} - валідація провалилась"></span>`;
+        default: return `<span class="dot gray" title="${title} - невідомий статус"></span>`;
+      }
+    };
+    
+    const clientDnsStatusDot = (status, applied, loading = false, clientId = null, host = null, details = null) => {
+      // Кнопка перевірки доступна для всіх клієнтів з host
+      const refreshIcon = (clientId && host) ? `<button onclick="refreshDnsStatus(${clientId})" class="refresh-web-btn" title="Check DNS" style="background:none;border:none;cursor:pointer;padding:2px;margin-left:4px;color:#94a3b8;font-size:12px;">🔍</button>` : '';
+      
+      if (loading) return `<span class="dot gray" title="Checking DNS..." style="animation: pulse 1.5s ease-in-out infinite;"></span>${refreshIcon}`;
+      
+      let title = 'Client DNS check';
+      if (details && details.error) {
+        title = `Error: ${details.error}`;
+      } else if (details && details.resolved_to) {
+        title = `Resolved to: ${details.resolved_to} (expected: ${details.expected_alb || 'N/A'})`;
+      } else if (details && details.resolved_ips && details.resolved_ips.length > 0) {
+        title = `Resolved IPs: ${details.resolved_ips.join(', ')}`;
+      }
+      
+      switch(status) {
+        case 'correct': return `<span class="dot green" title="${title} - DNS правильно налаштовано"></span>${refreshIcon}`;
+        case 'incorrect': return `<span class="dot yellow" title="${title} - DNS неправильно налаштовано"></span>${refreshIcon}`;
+        case 'missing': return `<span class="dot red" title="${title} - DNS запис відсутній"></span>${refreshIcon}`;
+        case 'error': return `<span class="dot red" title="${title} - помилка перевірки"></span>${refreshIcon}`;
+        case 'not_checked': return `<span class="dot gray" title="Not checked - click 🔍 to check"></span>${refreshIcon}`;
+        default: return `<span class="dot gray" title="${title}"></span>${refreshIcon}`;
+      }
+    };
+
+    const fetchHealth = async (domain, params={}) => {
+      const sp = new URLSearchParams();
+      if (domain) sp.set('domain', domain);
+      if (params.include_http === true) sp.set('include_http','true');
+      if (params.include_dns === true) sp.set('include_dns','true');
+      if (params.check_deployed === true) sp.set('check_deployed','true');
+      const qs = sp.toString() ? ('?' + sp.toString()) : '';
+      const res = await fetch(backend + '/clients/health' + qs);
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    };
+
+    // Мемоізація для лампочок та кнопок
+    const dotCache = new Map();
+    const buttonTextCache = new Map();
+    
+    function getCachedButtonText(applied, canDeploy) {
+      const key = `${applied}-${canDeploy}`;
+      if (buttonTextCache.has(key)) {
+        return buttonTextCache.get(key);
+      }
+      
+      let btnTextKey, btnText, btnClass, disabled;
+      if (applied) {
+        // Вже задеплоєно - показуємо статус, не кнопку
+        btnTextKey = 'clients.button.applied';
+        btnText = window.i18n ? window.i18n.t(btnTextKey) : 'Застосовано';
+        btnClass = 'btn-applied';
+        disabled = true;
+      } else if (canDeploy) {
+        // Готовий до деплою
+        btnTextKey = 'clients.button.deploy-ingress';
+        btnText = window.i18n ? window.i18n.t(btnTextKey) : 'Деплой інгрес';
+        btnClass = 'btn-deploy';
+        disabled = false;
+      } else {
+        // Не готовий
+        btnTextKey = 'clients.button.unavailable';
+        btnText = window.i18n ? window.i18n.t(btnTextKey) : 'Недоступно';
+        btnClass = 'btn-deploy';
+        disabled = true;
+      }
+      
+      const result = { btnTextKey, btnText, btnClass, disabled };
+      buttonTextCache.set(key, result);
+      return result;
+    }
+
+    // Функція для оновлення окремого рядка в таблиці
+    const updateSingleRow = (clientData) => {
+      const row = document.querySelector(`tr[data-client-id="${clientData.id}"]`);
+      if (!row) return;
+      
+      const webCell = row.querySelector('.web-status-cell');
+      if (webCell) {
+        webCell.innerHTML = dot(clientData.status, clientData.applied, false, clientData.id, clientData.host);
+      }
+    };
+    
+    const updateTable = (rowsData) => {
+      // Перевірка на зміни
+      if (!dataChanged(rowsData, lastRenderData)) {
+        return; // Нічого не змінилося
+      }
+      
+      const now = Date.now();
+      if (now - lastRenderTime < MIN_RENDER_INTERVAL) {
+        // Занадто часто, очікуємо
+        clearTimeout(renderTimeout);
+        renderTimeout = setTimeout(() => updateTable(rowsData), MIN_RENDER_INTERVAL - (now - lastRenderTime));
+        return;
+      }
+      
+      lastRenderData = rowsData;
+      lastRenderTime = now;
+      
+      let html = '';
+      try {
+        // Використовуємо document fragment для кращої продуктивності
+        html = rowsData.map(c => {
+          const nameContent = c.host ? 
+            `<a href="https://${c.host}" target="_blank" rel="noopener noreferrer">${c.host}</a>` : 
+            '<span class="muted">не налаштовано</span>';
+          
+          const certStatus = (c.cert_status || '-') + (c.group_name ? (' · ' + c.group_name) : '');
+          
+          // Web статус з кнопкою перевірки для всіх клієнтів з host
+          const webStatus = dot(c.status, c.applied, false, c.id, c.host);
+          
+          // Client DNS статус з кнопкою перевірки для deployed клієнтів
+          const clientDnsStatus = clientDnsStatusDot(
+            c.dns_check_status || 'not_checked',
+            c.applied,
+            false,
+            c.id,
+            c.host,
+            c.dns_check_details
+          );
+          
+          const { btnTextKey, btnText, btnClass, disabled } = getCachedButtonText(c.applied, !!c.can_deploy);
+          
+          return `<tr data-client-id="${c.id}">
+            <td class="cell-name">${nameContent}</td>
+            <td><span class="status-badge">${certStatus}</span></td>
+            <td>${albStatusDot(c.alb_status, c.group_name)}</td>
+            <td>${dnsStatusDot(c.dns_records_status, c.cert_status)}</td>
+            <td class="client-dns-status-cell">${clientDnsStatus}</td>
+            <td class="web-status-cell">${webStatus}</td>
+            <td><button data-id="${c.id}" data-path="${c.ingress_path||''}" data-i18n-key="${btnTextKey}" class="${btnClass}" ${disabled?'disabled':''}>${btnText}</button></td>
+          </tr>`;
+        }).join('');
+      } catch (e) {
+        console.error('Render error:', e);
+        html = '';
+      }
+      
+      // Один DOM update
+      const tbody = document.getElementById('tbody');
+      const countEl = document.getElementById('count');
+      
+      if (html && html.length > 0) {
+        tbody.innerHTML = html;
+        countEl.textContent = `Завантажено ${rowsData.length}`;
+      } else {
+        tbody.innerHTML = '<tr><td colspan="7" style="color:#94a3b8">Порожньо</td></tr>';
+        countEl.textContent = 'Порожньо';
+      }
+      
+      // Оптимізованое оновлення перекладів без setTimeout
+      updateLocalizedContent();
+    };
+
+    // Прогресивна HTTP перевірка клієнтів (тільки для ручного запуску)
+    const probeClientHttp = async (clientData) => {
+      if (!clientData.applied || !clientData.host) return clientData;
+      
+      try {
+        const res = await fetch(`${backend}/clients/health?include_http=true&check_deployed=true`);
+        if (!res.ok) return clientData;
+        
+        const allData = await res.json();
+        const updated = allData.find(c => c.id === clientData.id);
+        
+        if (updated) {
+          return updated;
+        }
+      } catch (e) {
+        console.debug('HTTP probe failed for client', clientData.id, e);
+      }
+      
+      return clientData;
+    };
+    
+    // Оптимізована render функція
+    let isRendering = false;
+    let pendingRender = false;
+    
+    const render = async (forceRefresh = false, includeHttp = false, includeDns = false) => {
+      if (isRendering && !forceRefresh) {
+        pendingRender = true;
+        return;
+      }
+      
+      isRendering = true;
+      pendingRender = false;
+      
+      try {
+        const domain = document.getElementById('filter').value.trim();
+        
+        // КРОК 1: Спочатку завантажуємо базові дані БЕЗ HTTP/DNS перевірок
+        console.log('Loading basic client data...');
+        const basicData = await fetchHealth(domain || undefined, {});
+        
+        if (!basicData || basicData.length === 0) {
+          console.warn('No clients data received');
+          const tbody = document.getElementById('tbody');
+          const count = document.getElementById('count');
+          if (tbody && count) {
+            tbody.innerHTML = '<tr><td colspan="7" style="color:#94a3b8">Порожньо</td></tr>';
+            count.textContent = 'Порожньо';
+          }
+          return;
+        }
+        
+        // Сортуємо і показуємо таблицю ОДРАЗУ
+        basicData.sort((a,b)=> (a.host||'').localeCompare(b.host||''));
+        console.log('Loaded clients:', basicData.length);
+        updateTable(basicData);
+        
+        // КРОК 2: Якщо потрібно, завантажуємо HTTP статуси (фоново)
+        if (includeHttp) {
+          console.log('Loading HTTP statuses in background...');
+          setTimeout(async () => {
+            try {
+              const params = { include_http: true };
+              const httpData = await fetchHealth(domain || undefined, params);
+              if (httpData && httpData.length > 0) {
+                httpData.sort((a,b)=> (a.host||'').localeCompare(b.host||''));
+                updateTable(httpData);
+                console.log('HTTP statuses updated');
+              }
+            } catch (e) {
+              console.error('Failed to load HTTP statuses:', e);
+            }
+          }, 100);
+        }
+        
+        // КРОК 3: Якщо потрібно, завантажуємо DNS статуси (фоново)
+        if (includeDns) {
+          console.log('Loading DNS statuses in background...');
+          setTimeout(async () => {
+            try {
+              const params = { include_dns: true };
+              const dnsData = await fetchHealth(domain || undefined, params);
+              if (dnsData && dnsData.length > 0) {
+                dnsData.sort((a,b)=> (a.host||'').localeCompare(b.host||''));
+                updateTable(dnsData);
+                console.log('DNS statuses updated');
+              }
+            } catch (e) {
+              console.error('Failed to load DNS statuses:', e);
+            }
+          }, 200);
+        }
+        
+      } catch (err) {
+        console.error('Render error:', err);
+        // Оптимізована обробка помилки
+        const tbody = document.getElementById('tbody');
+        const count = document.getElementById('count');
+        if (tbody && count) {
+          tbody.innerHTML = `<tr><td colspan="7" style="color:#ef4444">Помилка: ${String(err).substring(0, 100).replace(/</g,'&lt;')}</td></tr>`;
+          count.textContent = 'Помилка';
+        }
+      } finally {
+        isRendering = false;
+        
+        // Якщо був запит на оновлення під час виконання
+        if (pendingRender) {
+          setTimeout(render, 100);
+        }
+      }
+    };
+
+    // Оптимізовані event listeners
+    const debouncedRender = debounce(() => render(false, true), RENDER_DEBOUNCE);
+    const debouncedSearch = debounce(() => render(true, true), 300); // 300мс для пошуку
+    
+    document.getElementById('refresh').addEventListener('click', () => render(true, true));
+    document.getElementById('filter').addEventListener('input', debouncedSearch); // input замість change
+    document.getElementById('filter').addEventListener('change', debouncedSearch);
+
+    document.getElementById('refreshK8s').addEventListener('click', async () => {
+      const btn = document.getElementById('refreshK8s');
+      try {
+        btn.disabled = true; btn.textContent = 'K8s...';
+        const res = await fetch(backend + '/k8s/snapshot/refresh', { method:'POST' });
+        if (!res.ok) throw new Error(await res.text());
+        showToast('K8s оновлено');
+        await render(false, true);
+      } catch (err) {
+        alert(String(err));
+      } finally {
+        btn.disabled = false; btn.textContent = 'Оновити стан K8s';
+      }
+    });
+
+    document.getElementById('importNow').addEventListener('click', async () => {
+      try {
+        const domain = document.getElementById('filter').value.trim();
+        const q = domain ? ('?domain=' + encodeURIComponent(domain)) : '';
+        const btn = document.getElementById('importNow');
+        btn.disabled = true; btn.textContent = 'Імпорт...';
+        const res = await fetch(backend + '/clients/import' + q, { method:'POST' });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        showToast(`Імпортовано ${data.count}`);
+        await render(false, true);
+      } catch (err) {
+        alert(String(err));
+      } finally {
+        const btn = document.getElementById('importNow');
+        btn.disabled = false; btn.textContent = 'Імпортувати';
+      }
+    });
+
+    document.getElementById('checkAllDns').addEventListener('click', async () => {
+      const btn = document.getElementById('checkAllDns');
+      const originalText = btn.textContent;
+      try {
+        btn.disabled = true;
+        btn.textContent = window.i18n ? window.i18n.t('clients.loading') : 'Перевірка...';
+        
+        const domain = document.getElementById('filter').value.trim();
+        const params = new URLSearchParams({ include_dns: 'true' });
+        if (domain) params.set('domain', domain);
+        
+        const res = await fetch(`${backend}/clients/health?${params.toString()}`);
+        if (!res.ok) throw new Error(await res.text());
+        
+        const data = await res.json();
+        const checkedCount = data.filter(c => c.dns_check_status && c.dns_check_status !== 'not_checked').length;
+        
+        showToast(`Перевірено DNS для ${checkedCount} клієнтів`);
+        
+        // Оновлюємо таблицю (без повторної перевірки)
+        await render();
+      } catch (err) {
+        alert('Помилка перевірки DNS: ' + err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    });
+
+    document.getElementById('albStats').addEventListener('click', async () => {
+      const btn = document.getElementById('albStats');
+      try {
+        btn.disabled = true; 
+        btn.textContent = 'Завантаження...';
+        
+        const res = await fetch(backend + '/alb/group-recommendations');
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        
+        // Показуємо модальне вікно з статистикою
+        showAlbStats(data);
+      } catch (err) {
+        alert('Помилка завантаження ALB статистики: ' + err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'ALB групи';
+      }
+    });
+
+    document.addEventListener('click', async (e) => {
+      const t = e.target;
+      // Тільки кнопки Deploy (не Applied)
+      if (t && t.classList && t.classList.contains('btn-deploy') && !t.classList.contains('btn-applied') && !t.disabled) {
+        const id = t.getAttribute('data-id');
+        if (!id) return;
+        
+        const originalText = t.textContent;
+        
+        try {
+          t.disabled = true; 
+          t.textContent = window.i18n ? window.i18n.t('clients.loading') : 'Деплой...';
+          
+          const res = await fetch(backend + `/clients/${id}/deploy`, { method:'POST' });
+          if (!res.ok) throw new Error(await res.text());
+          
+          const data = await res.json().catch(()=>({}));
+          const successMsg = window.i18n?.getCurrentLanguage() === 'en' 
+            ? `Applied ${data.host||''} (${data.namespace||'prod'})`
+            : `Застосовано ${data.host||''} (${data.namespace||'prod'})`;
+          
+          showToast(successMsg);
+          await render(false, true);
+        } catch (err) {
+          alert(String(err));
+          t.disabled = false;
+          t.textContent = originalText;
+        }
+      }
+    });
+
+
+    // Автоматичне оновлення з HTTP перевіркою
+    let autoRefreshInterval = null;
+    let refreshIntervalTime = 1800000; // інтервал 30 хвилин (HTTP перевірка, без K8s)
+    
+    function startAutoRefresh() {
+      if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+      }
+      autoRefreshInterval = setInterval(() => {
+        // Не оновлювати, якщо сторінка неактивна
+        if (document.hidden) return;
+        render(false, true); // Auto-refresh з HTTP перевіркою
+      }, refreshIntervalTime);
+    }
+    
+    // Призупиняти оновлення, коли сторінка не видна
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (autoRefreshInterval) {
+          clearInterval(autoRefreshInterval);
+          autoRefreshInterval = null;
+        }
+      } else {
+        // Оновити одразу після повернення
+        render(true, true);
+        startAutoRefresh();
+      }
+    });
+    
+    // Функція показу ALB статистики
+    function showAlbStats(data) {
+      const modalId = 'albStatsModal';
+      
+      // Видаляємо попередній модал
+      const existing = document.getElementById(modalId);
+      if (existing) existing.remove();
+      
+      // Створюємо HTML таблиці груп
+      const groupsTable = data.group_statistics.map(group => {
+        const statusColor = group.status === 'available' ? '#10b981' : '#ef4444';
+        const statusText = group.status === 'available' ? 'Доступно' : 'Повна';
+        const configBadge = group.configured ? 
+          '<span style="background:#10b981;color:white;padding:2px 6px;border-radius:4px;font-size:10px;margin-left:4px">Конфігуровано</span>' :
+          '<span style="background:#94a3b8;color:white;padding:2px 6px;border-radius:4px;font-size:10px;margin-left:4px">Auto</span>';
+        
+        return `
+          <tr>
+            <td style="font-weight:500">${group.group_name}${configBadge}</td>
+            <td>${group.certificate_count}/${group.max_certificates}</td>
+            <td style="color:${statusColor};font-weight:500">${statusText}</td>
+            <td style="font-size:11px;color:#64748b;max-width:200px;overflow:hidden;text-overflow:ellipsis" title="${group.dns_hostname || 'Немає'}">${group.dns_hostname || 'Не налаштовано'}</td>
+          </tr>
+        `;
+      }).join('');
+      
+      const modal = document.createElement('div');
+      modal.id = modalId;
+      modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        backdrop-filter: blur(5px);
+      `;
+      
+      modal.innerHTML = `
+        <div style="
+          background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+          border: 1px solid rgba(148,163,184,0.2);
+          border-radius: 16px;
+          padding: 24px;
+          max-width: 800px;
+          width: 90%;
+          color: #e5e7eb;
+          backdrop-filter: blur(10px);
+        ">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <h3 style="margin:0;font-size:20px">📊 ALB Групи Статистика</h3>
+            <button onclick="document.getElementById('${modalId}').remove()" style="
+              background: none;
+              border: none;
+              color: #94a3b8;
+              font-size: 24px;
+              cursor: pointer;
+              padding: 0;
+              width: 30px;
+              height: 30px;
+            ">&times;</button>
+          </div>
+          
+          <div style="margin-bottom:16px;padding:12px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:8px">
+            <strong>🎯 Рекомендована група:</strong> <code>${data.recommended_group}</code><br>
+            <small style="color:#94a3b8">Нові клієнти будуть додані в цю групу</small>
+          </div>
+          
+          <table style="width:100%;border-collapse:separate;border-spacing:0;background:rgba(255,255,255,0.02);border-radius:8px;overflow:hidden">
+            <thead>
+              <tr style="background:rgba(11,18,32,0.8)">
+                <th style="padding:12px;text-align:left;font-size:12px;color:#cbd5e1">Назва Групи</th>
+                <th style="padding:12px;text-align:left;font-size:12px;color:#cbd5e1">Сертифікати</th>
+                <th style="padding:12px;text-align:left;font-size:12px;color:#cbd5e1">Статус</th>
+                <th style="padding:12px;text-align:left;font-size:12px;color:#cbd5e1">DNS Hostname</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${groupsTable}
+            </tbody>
+          </table>
+          
+          <div style="margin-top:16px;padding:12px;background:rgba(148,163,184,0.1);border-radius:8px;font-size:12px;color:#94a3b8">
+            📈 Ліміт: <strong>${data.certificate_limit_per_group}</strong> сертифікатів на групу |
+            📋 Конфігуровано: <strong>${data.total_configured_groups}</strong> груп(и) |
+            ⚙️ Стратегія: <strong>${data.alb_creation_strategy}</strong>
+          </div>
+          
+          ${data.new_alb_required ? `
+            <div style="margin-top:12px;padding:12px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:8px;font-size:13px;color:#fbbf24">
+              ⚠️ <strong>Потрібен новий ALB!</strong><br>
+              Група: <code>${data.alb_creation_info.group_name}</code><br>
+              <small style="color:#94a3b8">${data.alb_creation_info.message}</small>
+              <br><button onclick="showAlbCreationInstructions('${data.alb_creation_info.group_name}')" style="
+                margin-top:8px;
+                padding:4px 8px;
+                background:rgba(251,191,36,0.1);
+                border:1px solid rgba(251,191,36,0.3);
+                color:#fbbf24;
+                border-radius:4px;
+                cursor:pointer;
+                font-size:11px;
+              ">Показати інструкції</button>
+            </div>
+          ` : ''}
+          
+          <div style="margin-top:16px;text-align:center">
+            <button onclick="document.getElementById('${modalId}').remove()" style="
+              padding: 8px 16px;
+              background: rgba(16,185,129,0.1);
+              border: 1px solid rgba(16,185,129,0.3);
+              color: #10b981;
+              border-radius: 6px;
+              cursor: pointer;
+            ">Закрити</button>
+          </div>
+        </div>
+      `;
+      
+      // Закриваємо по кліку на фон
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+      });
+      
+      document.body.appendChild(modal);
+    }
+    
+    // Функція показу інструкцій створення ALB
+    async function showAlbCreationInstructions(groupName) {
+      try {
+        const res = await fetch(`${backend}/alb/creation-instructions/${groupName}`);
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        
+        const modalId = 'albInstructionsModal';
+        const existing = document.getElementById(modalId);
+        if (existing) existing.remove();
+        
+        // Генерація контенту залежно від стратегії
+        let instructionsContent = '';
+        
+        if (data.alb_exists) {
+          instructionsContent = `
+            <div style="padding:16px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:8px;color:#10b981">
+              ✅ <strong>ALB вже існує!</strong><br>
+              Група: <code>${groupName}</code><br>
+              DNS: <code>${data.dns_hostname}</code>
+            </div>
+          `;
+        } else {
+          const instructions = data.instructions;
+          
+          if (instructions.strategy === 'k8s-controller') {
+            instructionsContent = `
+              <div style="padding:16px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);border-radius:8px;color:#3b82f6">
+                🤖 <strong>Автоматичне створення</strong><br>
+                <p>Група: <code>${groupName}</code></p>
+                <p>${instructions.message}</p>
+                <div style="background:rgba(59,130,246,0.05);padding:12px;border-radius:6px;margin:8px 0;font-size:12px">
+                  <strong>Наступні кроки:</strong><br>
+                  ${instructions.next_steps}
+                </div>
+              </div>
+            `;
+          } else if (instructions.strategy === 'manual') {
+            const steps = instructions.aws_console_instructions.steps.map(step => 
+              `<li style="margin:4px 0;font-size:13px">${step}</li>`
+            ).join('');
+            
+            instructionsContent = `
+              <div style="padding:16px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2);border-radius:8px;color:#fbbf24">
+                ⚙️ <strong>Мануальне створення</strong><br>
+                <p>Група: <code>${groupName}</code></p>
+                
+                <div style="margin:16px 0">
+                  <h4 style="margin:8px 0;color:#fbbf24">Інструкції AWS Console:</h4>
+                  <ol style="margin:0;padding-left:20px;">${steps}</ol>
+                </div>
+                
+                <details style="margin:16px 0;">
+                  <summary style="cursor:pointer;color:#fbbf24;font-weight:bold">📄 Terraform конфігурація</summary>
+                  <pre style="background:rgba(0,0,0,0.2);padding:12px;border-radius:6px;overflow:auto;font-size:11px;margin:8px 0;white-space:pre-wrap">${instructions.terraform_config}</pre>
+                </details>
+              </div>
+            `;
+          } else {
+            instructionsContent = `
+              <div style="padding:16px;background:rgba(148,163,184,0.1);border:1px solid rgba(148,163,184,0.2);border-radius:8px;color:#64748b">
+                📝 <strong>Сповіщення</strong><br>
+                <p>${instructions.message}</p>
+                <p><strong>Наступні кроки:</strong> ${instructions.next_steps}</p>
+              </div>
+            `;
+          }
+        }
+        
+        const modal = document.createElement('div');
+        modal.id = modalId;
+        modal.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0,0,0,0.8);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+          backdrop-filter: blur(5px);
+        `;
+        
+        modal.innerHTML = `
+          <div style="
+            background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+            border: 1px solid rgba(148,163,184,0.2);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            color: #e5e7eb;
+            backdrop-filter: blur(10px);
+          ">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+              <h3 style="margin:0;font-size:18px">🔧 ALB Створення - ${groupName}</h3>
+              <button onclick="document.getElementById('${modalId}').remove()" style="
+                background: none;
+                border: none;
+                color: #94a3b8;
+                font-size: 24px;
+                cursor: pointer;
+                padding: 0;
+                width: 30px;
+                height: 30px;
+              ">&times;</button>
+            </div>
+            
+            ${instructionsContent}
+            
+            <div style="margin-top:20px;text-align:center">
+              <button onclick="document.getElementById('${modalId}').remove()" style="
+                padding: 8px 16px;
+                background: rgba(16,185,129,0.1);
+                border: 1px solid rgba(16,185,129,0.3);
+                color: #10b981;
+                border-radius: 6px;
+                cursor: pointer;
+              ">Закрити</button>
+            </div>
+          </div>
+        `;
+        
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) modal.remove();
+        });
+        
+        document.body.appendChild(modal);
+        
+      } catch (err) {
+        alert('Помилка завантаження інструкцій: ' + err);
+      }
+    }
+    
+    // Глобальна функція для виклику з HTML
+    window.showAlbCreationInstructions = showAlbCreationInstructions;
+    
+    // Початкове завантаження з HTTP перевіркою
+    render(false, true);
+    startAutoRefresh();
+    
+    // Підтримка локалізації
+    function updateLanguageFlag() {
+      const flagIcon = document.getElementById('flag-icon');
+      if (flagIcon && window.i18n) {
+        const lang = window.i18n.getCurrentLanguage();
+        flagIcon.className = `flag flag-${lang}`;
+      }
+    }
+    
+    window.toggleLanguage = function() {
+      if (window.i18n) {
+        window.i18n.toggleLanguage();
+        updateLanguageFlag();
+        // Оновити локалізовані елементи на сторінці
+        updateLocalizedContent();
+      }
+    };
+    
+    // Кеш DOM елементів
+    let cachedElements = null;
+    
+    function getCachedElements() {
+      if (!cachedElements) {
+        cachedElements = {
+          refreshBtn: document.getElementById('refresh'),
+          refreshK8sBtn: document.getElementById('refreshK8s'),
+          importBtn: document.getElementById('importNow'),
+          checkAllDnsBtn: document.getElementById('checkAllDns'),
+          albStatsBtn: document.getElementById('albStats'),
+          count: document.getElementById('count')
+        };
+      }
+      return cachedElements;
+    }
+    
+    function updateLocalizedContent() {
+      if (!window.i18n) return; // Нічого не робити, якщо i18n недоступний
+      
+      const elements = getCachedElements();
+      
+      // Оновити мітки кнопок (тільки якщо не disabled)
+      if (elements.refreshBtn && !elements.refreshBtn.disabled) {
+        elements.refreshBtn.textContent = window.i18n.t('clients.button.refresh');
+      }
+      
+      if (elements.refreshK8sBtn && !elements.refreshK8sBtn.disabled) {
+        elements.refreshK8sBtn.textContent = window.i18n.t('clients.button.refresh-k8s');
+      }
+      
+      if (elements.importBtn && !elements.importBtn.disabled) {
+        elements.importBtn.textContent = window.i18n.t('clients.button.import');
+      }
+      
+      if (elements.checkAllDnsBtn && !elements.checkAllDnsBtn.disabled) {
+        elements.checkAllDnsBtn.textContent = window.i18n.t('clients.button.check-all-dns');
+      }
+      
+      if (elements.albStatsBtn && !elements.albStatsBtn.disabled) {
+        elements.albStatsBtn.textContent = window.i18n.t('clients.button.alb-stats');
+      }
+      
+      // Оптимізоване оновлення кнопок в таблиці
+      try {
+        const actionButtons = document.querySelectorAll('.btn-deploy[data-i18n-key]:not(:disabled)');
+        for (const btn of actionButtons) {
+          const key = btn.getAttribute('data-i18n-key');
+          if (key) {
+            btn.textContent = window.i18n.t(key);
+          }
+        }
+      } catch (e) {
+        console.debug('Button translation update failed:', e);
+      }
+      
+      // Оновити лічильник
+      if (elements.count && elements.count.textContent) {
+        const match = elements.count.textContent.match(/\d+/);
+        if (match) {
+          const num = match[0];
+          const currentLang = window.i18n.getCurrentLanguage();
+          const prefix = currentLang === 'en' ? 'Loaded' : 'Завантажено';
+          elements.count.textContent = `${prefix} ${num}`;
+        }
+      }
+      
+      // Очистити кеш кнопок після зміни мови
+      buttonTextCache.clear();
+    }
+    
+    // Оновлювати флаг після ініціалізації системи локалізації
+    setTimeout(() => {
+      updateLanguageFlag();
+      updateLocalizedContent();
+    }, 100);
+  </script>
+</body>
+</html>
