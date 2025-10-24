@@ -721,6 +721,35 @@
       opacity: 1 !important;
       transform: translateY(-1px) !important;
     }
+    
+    /* Анімація завантаження форми */
+    .form-loader {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 16px;
+      margin-top: 16px;
+      background: rgba(6, 182, 212, 0.05);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 10px;
+      color: var(--primary);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(6, 182, 212, 0.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -770,12 +799,13 @@
       <label data-i18n="create.alb-group">ALB group.name (опційно)</label>
       <input name="group_name" data-i18n="create.alb-group.placeholder" placeholder="telemd-public3" />
       <label class="checkbox-label">
-        <input type="checkbox" name="create_pr" /> <span data-i18n="create.create-pr">Створити PR у фронтенд-репо</span>
+        <input type="checkbox" name="create_pr" checked /> <span data-i18n="create.create-pr">Створити PR у фронтенд-репо</span>
       </label>
       <label class="checkbox-label">
-        <input type="checkbox" name="auto_merge" /> <span data-i18n="create.auto-merge">Авто-мердж PR</span>
+        <input type="checkbox" name="auto_merge" checked /> <span data-i18n="create.auto-merge">Авто-мердж PR</span>
       </label>
       <button type="submit" class="btn-primary" data-i18n="create.submit">Створити</button>
+      <div id="createLoader" class="form-loader" style="display:none;"><div class="spinner"></div><span>Створення клієнта...</span></div>
     </form>
     <div id="createResult"></div>
   </div>
@@ -904,21 +934,27 @@ const backend = 'https://manage.telegramd.com';
       e.preventDefault();
       const submitBtn = e.target.querySelector('button[type="submit"]');
       const originalText = submitBtn.textContent;
+      const loader = document.getElementById('createLoader');
+      const resultDiv = document.getElementById('createResult');
       
+      // Показати лоадер і заблокувати кнопку
       submitBtn.classList.add('loading');
       submitBtn.disabled = true;
+      loader.style.display = 'flex';
+      resultDiv.innerHTML = '';
       
       const fd = new FormData(e.target);
       const payload = Object.fromEntries(fd.entries());
-      payload.create_pr = !!fd.get('create_pr');
-      payload.auto_merge = !!fd.get('auto_merge');
+      payload.create_pr = Boolean(fd.get('create_pr'));
+      payload.auto_merge = Boolean(fd.get('auto_merge'));
+
       try {
         const data = await postJson(backend + '/clients', payload);
         const domain = data.domain || payload.domain || '';
         const subdomain = data.subdomain || payload.subdomain || '';
         const host = subdomain && domain ? `${subdomain}.${domain}` : '';
         const albValue = data.alb_dns_name || '';
-        document.getElementById('createResult').innerHTML = `
+        resultDiv.innerHTML = `
           <div style="border:1px solid rgba(148,163,184,0.25);border-radius:10px;padding:14px;background:rgba(255,255,255,0.02);line-height:1.5">
             <div style="margin-bottom:8px;color:#e5e7eb">Please add the following CNAME records to the ${domain} DNS configuration</div>
             <div style="margin:8px 0;color:#cbd5e1">SSL/TLS certificate validation:</div>
@@ -931,13 +967,14 @@ const backend = 'https://manage.telegramd.com';
         `;
         loadAlbStats(); // Оновити статистику
       } catch (err) {
-        document.getElementById('createResult').innerHTML = `<pre>${err.message}</pre>`;
+        resultDiv.innerHTML = `<pre>${err.message}</pre>`;
       } finally {
+        // Приховати лоадер і розблокувати кнопку
+        loader.style.display = 'none';
         submitBtn.classList.remove('loading');
         submitBtn.disabled = false;
       }
     });
-
 
 
     document.getElementById('reissueForm').addEventListener('submit', async (e) => {

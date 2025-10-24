@@ -1,4 +1,4 @@
 .env
 /logs
-/backend/data/app.db
 /.venv
+backup_db.sh
