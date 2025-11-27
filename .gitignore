@@ -2,3 +2,4 @@
 /logs
 /.venv
 backup_db.sh
+backend/data/app.db
