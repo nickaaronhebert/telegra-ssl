@@ -2243,7 +2243,11 @@ def build_server_block(host: str, affiliate: str) -> str:
 server {{
     listen       80;
     server_name  {host};
-
+    gzip on;
+    gzip_min_length 1024;
+    gzip_comp_level 6;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/javascript application/json image/svg+xml;
+    gzip_vary on;
     location / {{
         if ($has_params = '0') {{
             set $additional_param "affiliate=aff::{affiliate}";
@@ -2252,8 +2256,16 @@ server {{
         root   /usr/share/nginx/build;
         index  index.html index.htm;
         try_files $uri $uri/ /index.html =404;
+        expires $expires;
+        add_header Cache-Control "public, immutable";
+        add_header Pragma "public";
     }}
-
+    location = /index.html {{
+        root /usr/share/nginx/build;
+        expires 1d;
+        add_header Cache-Control "public, max-age=86400, must-revalidate";
+        add_header Pragma "public";
+    }}
     error_page   500 502 503 504  /50x.html;
     location = /50x.html {{
         root   /usr/share/nginx/html;
